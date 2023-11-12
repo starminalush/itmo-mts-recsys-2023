@@ -1,21 +1,19 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
 from ...log import app_logger
 from ...pydantic_schemas.recommendations import RecoModel, RecoResponse
+from ..auth.auth_bearer import JWTBearer, jwt_bearer
 from ..exceptions import ModelNotFoundError, UserNotFoundError
 
 router = APIRouter()
 
 
-@router.get(path="/", response_model=list[RecoModel])
+@router.get(path="/", response_model=list[RecoModel], dependencies=[Depends(jwt_bearer)])
 async def get_all_models(request: Request) -> list[RecoModel]:
     return [RecoModel(name=getattr(model, "MODEL_NAME")) for model in request.app.state.models]
 
 
-@router.get(
-    path="/{model_name}/{user_id}",
-    response_model=RecoResponse,
-)
+@router.get(path="/{model_name}/{user_id}", response_model=RecoResponse, dependencies=[Depends(jwt_bearer)])
 async def get_reco(request: Request, model_name: str, user_id: int) -> RecoResponse:
     app_logger.info(f"Request for model: {model_name}, user_id: {user_id}")
     models_list = request.app.state.models

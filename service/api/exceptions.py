@@ -17,6 +17,17 @@ class AppException(Exception):
         super().__init__()
 
 
+class UnauthorizedUserError(AppException):
+    def __init__(
+        self,
+        status_code: int = HTTPStatus.UNAUTHORIZED,
+        error_key: str = "invalid_jwt_token",
+        error_message: str = "Invalid JWT token",
+        error_loc: Sequence[str] | None = None,
+    ):
+        super().__init__(status_code, error_key, error_message, error_loc)
+
+
 class UserNotFoundError(AppException):
     def __init__(
         self,

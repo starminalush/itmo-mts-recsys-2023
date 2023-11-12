@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 from service.settings import ServiceConfig
 
