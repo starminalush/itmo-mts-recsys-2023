@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request
-from ..exceptions import ModelNotFoundError, UserNotFoundError
+
 from ...log import app_logger
-from ...pydantic_schemas.recomendations import RecoResponse, RecoModel
+from ...pydantic_schemas.recomendations import RecoModel, RecoResponse
+from ..exceptions import ModelNotFoundError, UserNotFoundError
 
 router = APIRouter()
 
