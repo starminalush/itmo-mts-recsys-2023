@@ -10,7 +10,7 @@ from ..recsys_models.top_reco import TopRecoModel
 from ..settings import ServiceConfig
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
-from .views import add_views
+from .api import router
 
 __all__ = ("create_app",)
 
@@ -36,12 +36,12 @@ def create_app(config: ServiceConfig) -> FastAPI:
     setup_logging(config)
     setup_asyncio(thread_name_prefix=config.service_name)
 
-    app = FastAPI(debug=False)
-    app.state.k_recs = config.k_recs
-    app.state.models = models
+    new_app = FastAPI(debug=False)
+    new_app.state.k_recs = config.k_recs
+    new_app.state.models = models
 
-    add_views(app)
-    add_middlewares(app)
-    add_exception_handlers(app)
+    new_app.include_router(router)
+    add_middlewares(new_app)
+    add_exception_handlers(new_app)
 
-    return app
+    return new_app
