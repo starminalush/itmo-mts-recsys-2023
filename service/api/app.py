@@ -6,15 +6,15 @@ import uvloop
 from fastapi import FastAPI
 
 from ..log import app_logger, setup_logging
-from ..recsys_models.top_reco import TopRecoModel
+from ..recsys_models.test_model import TestModel
 from ..settings import ServiceConfig
-from .api import router
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
+from .views import router
 
 __all__ = ("create_app",)
 
-models = [TopRecoModel()]
+models = [TestModel()]
 
 
 def setup_asyncio(thread_name_prefix: str) -> None:

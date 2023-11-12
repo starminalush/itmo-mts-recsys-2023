@@ -1,5 +1,5 @@
-import typing as tp
 from http import HTTPStatus
+from typing import Sequence
 
 
 class AppException(Exception):
@@ -8,7 +8,7 @@ class AppException(Exception):
         status_code: int,
         error_key: str,
         error_message: str = "",
-        error_loc: tp.Optional[tp.Sequence[str]] = None,
+        error_loc: Sequence[str] | None = None,
     ) -> None:
         self.error_key = error_key
         self.error_message = error_message
@@ -23,7 +23,7 @@ class UserNotFoundError(AppException):
         status_code: int = HTTPStatus.NOT_FOUND,
         error_key: str = "user_not_found",
         error_message: str = "User is unknown",
-        error_loc: tp.Optional[tp.Sequence[str]] = None,
+        error_loc: Sequence[str] | None = None,
     ):
         super().__init__(status_code, error_key, error_message, error_loc)
 
@@ -34,6 +34,6 @@ class ModelNotFoundError(AppException):
         status_code: int = HTTPStatus.NOT_FOUND,
         error_key: str = "model_not_found",
         error_message: str = "Model is unknown",
-        error_loc: tp.Optional[tp.Sequence[str]] = None,
+        error_loc: Sequence[str] | None = None,
     ):
         super().__init__(status_code, error_key, error_message, error_loc)
