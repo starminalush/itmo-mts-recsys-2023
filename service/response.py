@@ -6,7 +6,7 @@ import orjson
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from service.models import Error
+from .pydantic_schemas.error import Error
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
@@ -36,11 +36,11 @@ class DataclassJSONResponse(JSONResponse):
 
 def create_response(
     status_code: int,
-    message: tp.Optional[str] = None,
-    data: tp.Optional[tp.Any] = None,
-    errors: tp.Optional[tp.List[Error]] = None,
+    message: str | None = None,
+    data: tp.Any | None = None,
+    errors: list[Error] | None = None,
 ) -> JSONResponse:
-    content: tp.Dict[str, tp.Any] = {}
+    content: dict[str, tp.Any] = {}
 
     if message is not None:
         content["message"] = message

@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from service.settings import ServiceConfig
 
-GET_RECO_PATH = "/reco/{model_name}/{user_id}"
+GET_RECO_PATH = "/reco/{model_name}/{user_id}/"
 
 
 def test_health(
@@ -13,6 +13,7 @@ def test_health(
     with client:
         response = client.get("/health")
     assert response.status_code == HTTPStatus.OK
+    assert response.json()["status"] == "OK"
 
 
 def test_get_reco_success(
@@ -48,3 +49,12 @@ def test_get_reco_from_unknown_model(client: TestClient) -> None:
         response = client.get(path)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json()["errors"][0]["error_key"] == "model_not_found"
+
+
+def test_get_reco_wrong_user_id_type(client: TestClient) -> None:
+    user_id = "user_ud"
+    path = GET_RECO_PATH.format(model_name="test_model", user_id=user_id)
+    with client:
+        response = client.get(path)
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert response.json()["errors"][0]["error_key"] == "int_parsing"

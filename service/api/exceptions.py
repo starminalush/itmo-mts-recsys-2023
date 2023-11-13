@@ -20,7 +20,7 @@ class AppException(Exception):
 class UnauthorizedUserError(AppException):
     def __init__(
         self,
-        status_code: int = HTTPStatus.UNAUTHORIZED,
+        status_code: int = HTTPStatus.FORBIDDEN,
         error_key: str = "invalid_jwt_token",
         error_message: str = "Invalid JWT token",
         error_loc: Sequence[str] | None = None,

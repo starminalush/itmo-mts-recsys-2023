@@ -3,8 +3,8 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict
 
 import uvloop
-from fastapi import Depends, FastAPI
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import FastAPI
+from fastapi.security import HTTPBearer
 
 from ..log import app_logger, setup_logging
 from ..recsys_models.test_model import TestModel

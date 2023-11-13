@@ -1,7 +1,9 @@
-from fastapi import HTTPException, Request
+import jwt
+from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .auth_handler import decodeJWT
+from ..exceptions import UnauthorizedUserError
+from .auth_handler import decode_jwt
 
 
 class JWTBearer(HTTPBearer):
@@ -12,23 +14,23 @@ class JWTBearer(HTTPBearer):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+                raise UnauthorizedUserError(error_message="Invalid authentication scheme")
             if not self.verify_jwt(credentials.credentials):
-                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+                raise UnauthorizedUserError(error_message="Invalid token or expired token")
             return credentials.credentials
         else:
-            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+            raise UnauthorizedUserError(error_message="Invalid authorization code")
 
     def verify_jwt(self, jwtoken: str) -> bool:
-        isTokenValid: bool = False
+        is_token_valid: bool = False
 
         try:
-            payload = decodeJWT(jwtoken)
-        except:
+            payload = decode_jwt(jwtoken)
+        except (jwt.InvalidSignatureError, jwt.InvalidAlgorithmError):
             payload = None
         if payload:
-            isTokenValid = True
-        return isTokenValid
+            is_token_valid = True
+        return is_token_valid
 
 
 jwt_bearer = JWTBearer()
