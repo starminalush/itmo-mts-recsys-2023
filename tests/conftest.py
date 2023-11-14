@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from service.api.app import create_app
-from service.api.auth.auth_bearer import jwt_bearer
+from service.api.auth import bearer_auth
 from service.settings import ServiceConfig, get_config
 
-from .patches import NoAuthJWTBearerPatch
+from .patches import NoAuthSimpleBearerPatch, TestSimpleBearerAuth
 
 
 @pytest.fixture
@@ -25,15 +25,21 @@ def app(
 
 @pytest.fixture
 def client(app: FastAPI) -> TestClient:
-    app.dependency_overrides[jwt_bearer] = NoAuthJWTBearerPatch()
+    app.dependency_overrides[bearer_auth] = NoAuthSimpleBearerPatch()
     return TestClient(app=app)
 
 
 @pytest.fixture
 def client_with_auth(app: FastAPI) -> TestClient:
+    app.dependency_overrides[bearer_auth] = TestSimpleBearerAuth()
     return TestClient(app=app)
 
 
 @pytest.fixture
 def fake_bearer_token() -> str:
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.pj0NmBjKT7cpC8NU35eGYJHbrNoSAfkAVdF20Aijlb8.123"
+    return "testtoken"
+
+
+@pytest.fixture
+def test_bearer_token() -> str:
+    return "supersecrettokenhere"

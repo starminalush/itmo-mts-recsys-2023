@@ -1,5 +1,4 @@
 name: Test
-
 on:
   push:
     branches:
@@ -19,7 +18,7 @@ jobs:
       - name: "Setup python"
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10.12
+          python-version: 3.9
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -39,10 +38,6 @@ jobs:
         run: poetry install
 
       - name: Run tests
-        env:
-          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM}}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
         run: make test
 
       - name: Run linters

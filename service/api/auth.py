@@ -1,36 +1,29 @@
-import jwt
+from os import getenv
+
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from ..exceptions import UnauthorizedUserError
-from .auth_handler import decode_jwt
+from service.api.exceptions import UnauthorizedUserError
+from service.log import app_logger
 
 
-class JWTBearer(HTTPBearer):
+class SimpleBearerAuth(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
+
+    def _validate_token(self, token: str) -> bool:
+        return token == getenv("TOKEN")
 
     async def __call__(self, request: Request):
         credentials: HTTPAuthorizationCredentials = await super().__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise UnauthorizedUserError(error_message="Invalid authentication scheme")
-            if not self.verify_jwt(credentials.credentials):
+            if not self._validate_token(credentials.credentials):
                 raise UnauthorizedUserError(error_message="Invalid token or expired token")
             return credentials.credentials
 
         raise UnauthorizedUserError(error_message="Invalid authorization code")
 
-    def verify_jwt(self, jwtoken: str) -> bool:
-        is_token_valid: bool = False
 
-        try:
-            payload = decode_jwt(jwtoken)
-        except (jwt.InvalidSignatureError, jwt.InvalidAlgorithmError):
-            payload = None
-        if payload:
-            is_token_valid = True
-        return is_token_valid
-
-
-jwt_bearer = JWTBearer()
+bearer_auth = SimpleBearerAuth()

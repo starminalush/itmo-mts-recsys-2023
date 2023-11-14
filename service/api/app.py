@@ -4,10 +4,9 @@ from typing import Any, Dict
 
 import uvloop
 from fastapi import FastAPI
-from fastapi.security import HTTPBearer
 
 from ..log import app_logger, setup_logging
-from ..recsys_models.test_model import TestModel
+from ..recsys_models.test import TestModel
 from ..settings import ServiceConfig
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
@@ -16,7 +15,6 @@ from .views import add_views
 __all__ = ("create_app",)
 
 models = [TestModel()]
-bearer_scheme = HTTPBearer()
 
 
 def setup_asyncio(thread_name_prefix: str) -> None:

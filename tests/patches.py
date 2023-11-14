@@ -1,8 +1,13 @@
 from fastapi import Request
 
-from service.api.auth.auth_bearer import JWTBearer
+from service.api.auth import SimpleBearerAuth
 
 
-class NoAuthJWTBearerPatch(JWTBearer):
+class NoAuthSimpleBearerPatch(SimpleBearerAuth):
     async def __call__(self, request: Request):
         return True
+
+
+class TestSimpleBearerAuth(SimpleBearerAuth):
+    def _validate_token(self, token: str) -> bool:
+        return token == "supersecrettokenhere"
