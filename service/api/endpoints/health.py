@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from service.api.auth.auth_bearer import jwt_bearer
 from service.pydantic_schemas.error import Error
-from service.pydantic_schemas.health import HealthCheck
+from service.pydantic_schemas.health_status import HealthCheck
 
 router = APIRouter()
 

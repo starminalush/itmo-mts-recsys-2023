@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Request
 
-from ...log import app_logger
-from ...pydantic_schemas.error import Error
-from ...pydantic_schemas.recommendations import RecoModel, RecoResponse
-from ..auth.auth_bearer import jwt_bearer
-from ..exceptions import ModelNotFoundError, UserNotFoundError
+from service.api.auth.auth_bearer import jwt_bearer
+from service.api.exceptions import ModelNotFoundError, UserNotFoundError
+from service.log import app_logger
+from service.pydantic_schemas.error import Error
+from service.pydantic_schemas.reco import RecoModel, RecoResponse
 
 router = APIRouter()
 
