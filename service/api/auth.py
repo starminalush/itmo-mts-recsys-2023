@@ -4,7 +4,6 @@ from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from service.api.exceptions import UnauthorizedUserError
-from service.log import app_logger
 
 
 class SimpleBearerAuth(HTTPBearer):
