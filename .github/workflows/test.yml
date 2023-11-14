@@ -1,4 +1,5 @@
 name: Test
+
 on:
   push:
     branches:
@@ -38,7 +39,11 @@ jobs:
         run: poetry install
 
       - name: Run tests
-        run: make lint
+        env:
+          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM}}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
+        run: make test
 
       - name: Run linters
-        run: make test
+        run: make lint
