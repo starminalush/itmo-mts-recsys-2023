@@ -19,7 +19,6 @@ gunicorn = "^21.2.0"
 orjson = "^3.9.10"
 httpx = "^0.25.1"
 uvicorn = "^0.24.0.post1"
-pyjwt = "^2.8.0"
 
 
 [tool.poetry.group.dev.dependencies]

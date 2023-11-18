@@ -24,6 +24,14 @@ def test_reco_model_list(
     with client:
         response = client.get(GET_RECO_MODELS_LIST_PATH)
     assert response.status_code == HTTPStatus.OK
+    assert (
+        all(
+            isinstance(model, dict)
+            and all(isinstance(key, str) and isinstance(value, str) for key, value in model.items())
+            for model in response.json()
+        )
+        is True
+    )
 
 
 def test_get_reco_success(
