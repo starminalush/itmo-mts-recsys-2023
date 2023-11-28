@@ -1,6 +1,6 @@
 from copy import deepcopy
 from time import time
-from typing import Any, TypeAlias
+from typing import Any, Iterator, Tuple, TypeAlias
 
 import numpy as np
 from rectools import Columns
@@ -11,7 +11,7 @@ from rectools.model_selection import Splitter, TimeRangeSplitter
 from rectools.models.base import ModelBase
 
 ModelMetrics: TypeAlias = list[dict[str, Any]]
-
+InteractionFolds: TypeAlias = Iterator[Tuple[np.ndarray, np.ndarray, dict[str, Any]]]
 _N_SPLITS = 3
 
 
@@ -36,7 +36,7 @@ def _get_default_splitter() -> Splitter:
     )
 
 
-def _split_dataset(splitter: Splitter, interactions: Interactions):
+def _split_dataset(splitter: Splitter, interactions: Interactions) -> InteractionFolds:
     return splitter.split(interactions, collect_fold_stats=True)
 
 
@@ -74,9 +74,7 @@ def calculate_metrics(
     if not interactions:
         raise ValueError("Interactions dataset should not be empty")
     if not metrics or len(metrics) == 0:
-        metrics = {
-            metric_name: metric for k in [1, 5, 10] for metric_name, metric in _get_default_metrics(k).items()
-        }
+        metrics = {metric_name: metric for k in [1, 5, 10] for metric_name, metric in _get_default_metrics(k).items()}
 
     splitter = _get_default_splitter() if not splitter else splitter
     results = []
