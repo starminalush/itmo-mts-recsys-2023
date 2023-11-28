@@ -52,8 +52,9 @@ def visualize_training_result(
     history.drop(["datetime", "weight"], axis=1, inplace=True)
 
     report = pd.concat([recos, history])
-    count_views = interactions.df.groupby("item_id").count().rename(columns={"user_id": "total_views"})
+    count_views = interactions.df.groupby("item_id").count()["user_id"]
     report = report.merge(item_data, how="inner", on="item_id")
+    count_views.name = "count_views"
     report = report.merge(count_views, how="inner", on="item_id")
 
     report.sort_values(["user_id", "type"], inplace=True)
