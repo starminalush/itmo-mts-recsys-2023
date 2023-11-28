@@ -3,6 +3,7 @@ from time import time
 from typing import Any, Iterator, Tuple, TypeAlias
 
 import numpy as np
+import pandas as pd
 from rectools import Columns
 from rectools.dataset import Dataset, Interactions
 from rectools.metrics import MAP, NDCG, MeanInvUserFreq, Precision, Recall, Serendipity, calc_metrics
@@ -11,7 +12,8 @@ from rectools.model_selection import Splitter, TimeRangeSplitter
 from rectools.models.base import ModelBase
 
 ModelMetrics: TypeAlias = list[dict[str, Any]]
-InteractionFolds: TypeAlias = Iterator[Tuple[np.ndarray, np.ndarray, dict[str, Any]]]
+InteractionFold: TypeAlias = Tuple[np.ndarray, np.ndarray, dict[str, Any]]
+InteractionFolds: TypeAlias = Iterator[InteractionFold]
 _N_SPLITS = 3
 
 
@@ -40,7 +42,9 @@ def _split_dataset(splitter: Splitter, interactions: Interactions) -> Interactio
     return splitter.split(interactions, collect_fold_stats=True)
 
 
-def _calculate_model_metrics(model: ModelBase, metrics: dict[str, MetricAtK], df_train, df_test, k_recos: int):
+def _calculate_model_metrics(
+    model: ModelBase, metrics: dict[str, MetricAtK], df_train: pd.DataFrame, df_test: pd.DataFrame, k_recos: int
+) -> Tuple[dict[str, float], float]:
     dataset = Dataset.construct(df_train)
     start_train_time = time()
     model.fit(dataset)
@@ -64,12 +68,11 @@ def _calculate_model_metrics(model: ModelBase, metrics: dict[str, MetricAtK], df
 def calculate_metrics(
     interactions: Interactions,
     metrics: dict[str, MetricAtK] | None,
-    models: dict[str, ModelBase],
+    model: ModelBase,
     splitter: Splitter | None,
     k_recos: int,
 ) -> ModelMetrics:
-    """Calculate metrics on models."""
-    if not models or len(models) == 0:
+    if not model:
         raise ValueError("Models should not be empty")
     if not interactions:
         raise ValueError("Interactions dataset should not be empty")
@@ -82,11 +85,10 @@ def calculate_metrics(
     for train_ids, test_ids, fold_info in _split_dataset(splitter=splitter, interactions=interactions):
         df_train = interactions.df.iloc[train_ids]
         df_test = interactions.df.iloc[test_ids][Columns.UserItem]
-        for model_name, model in models.items():
-            metric_values, train_time = _calculate_model_metrics(
-                model=deepcopy(model), metrics=metrics, df_train=df_train, df_test=df_test, k_recos=k_recos
-            )
-            res = {"fold": fold_info["i_split"], "model": model_name, "train time (sec)": train_time}
-            res.update(metric_values)
-            results.append(res)
+        metric_values, train_time = _calculate_model_metrics(
+            model=deepcopy(model), metrics=metrics, df_train=df_train, df_test=df_test, k_recos=k_recos
+        )
+        fold_result = {"fold": fold_info["i_split"], "model": model.__class__.__name__, "train time (sec)": train_time}
+        fold_result.update(metric_values)
+        results.append(fold_result)
     return results

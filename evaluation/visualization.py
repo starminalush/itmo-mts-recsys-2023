@@ -1,6 +1,8 @@
 from typing import Any
 
 import pandas as pd
+from rectools.dataset import Dataset, Interactions
+from rectools.models.base import ModelBase
 
 
 def visualize_metrics(report: dict[str, Any]) -> pd.DataFrame:
@@ -26,5 +28,35 @@ def visualize_metrics(report: dict[str, Any]) -> pd.DataFrame:
     return df_report
 
 
-def visualize_training_result():
-    pass
+def visualize_training_result(
+    model: ModelBase,
+    dataset: Dataset,
+    user_ids: list[int],
+    item_data: dict[str, str],
+    k_recos: int,
+    interactions: Interactions,
+    history_size_per_user: int = 10,
+) -> pd.DataFrame:
+    df = dataset.interactions.df
+    recos = model.recommend(users=user_ids, k=k_recos, dataset=dataset, filter_viewed=True)
+    recos["type"] = "reco"
+    recos.drop("score", axis=1, inplace=True)
+    history = (
+        df[df["user_id"].isin(user_ids)]
+        .sort_values(["user_id", "datetime"], ascending=[True, False])
+        .groupby("user_id")
+        .head(history_size_per_user)
+    )
+    history["rank"] = history.sort_values("datetime").groupby(["user_id"]).datetime.rank().astype("int")
+    history["type"] = "history"
+    history.drop(["datetime", "weight"], axis=1, inplace=True)
+
+    report = pd.concat([recos, history])
+    count_views = interactions.df.groupby("item_id").count().rename(columns={"user_id": "total_views"})
+    report = report.merge(item_data, how="inner", on="item_id")
+    report = report.merge(count_views, how="inner", on="item_id")
+
+    report.sort_values(["user_id", "type"], inplace=True)
+    report.set_index(["user_id", "type"], inplace=True)
+    report = report.style.set_table_styles([{"selector": "th", "props": [("text-align", "center")]}])
+    return report
