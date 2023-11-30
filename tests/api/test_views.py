@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from service.settings import ServiceConfig
 
 GET_RECO_PATH = "/reco/{model_name}/{user_id}/"
+GET_RECO_MODELS_LIST_PATH = "/reco"
 GET_HEALTH_PATH = "/health"
 
 
@@ -15,6 +16,22 @@ def test_health(
         response = client.get(GET_HEALTH_PATH)
     assert response.status_code == HTTPStatus.OK
     assert response.json()["status"] == "OK"
+
+
+def test_reco_model_list(
+    client: TestClient,
+) -> None:
+    with client:
+        response = client.get(GET_RECO_MODELS_LIST_PATH)
+    assert response.status_code == HTTPStatus.OK
+    assert (
+        all(
+            isinstance(model, dict)
+            and all(isinstance(key, str) and isinstance(value, str) for key, value in model.items())
+            for model in response.json()
+        )
+        is True
+    )
 
 
 def test_get_reco_success(

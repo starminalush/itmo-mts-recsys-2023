@@ -14,7 +14,7 @@ from .views import add_views
 
 __all__ = ("create_app",)
 
-models = [TestModel()]
+models = {"test_model": TestModel()}
 
 
 def setup_asyncio(thread_name_prefix: str) -> None:
