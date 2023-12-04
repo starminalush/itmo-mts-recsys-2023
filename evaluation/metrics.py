@@ -5,11 +5,10 @@ from typing import Any, Iterator, Tuple, TypeAlias
 import numpy as np
 import pandas as pd
 from rectools import Columns
-from rectools.dataset import Dataset, Interactions
+from rectools.dataset import Interactions
 from rectools.metrics import MAP, NDCG, MeanInvUserFreq, Precision, Recall, Serendipity, calc_metrics
 from rectools.metrics.base import MetricAtK
 from rectools.model_selection import Splitter, TimeRangeSplitter
-from rectools.models.base import ModelBase
 
 ModelMetrics: TypeAlias = list[dict[str, Any]]
 InteractionFold: TypeAlias = Tuple[np.ndarray, np.ndarray, dict[str, Any]]
@@ -43,18 +42,12 @@ def _split_dataset(splitter: Splitter, interactions: Interactions) -> Interactio
 
 
 def _calculate_model_metrics(
-    model: ModelBase, metrics: dict[str, MetricAtK], df_train: pd.DataFrame, df_test: pd.DataFrame, k_recos: int
+    model, metrics: dict[str, MetricAtK], df_train: pd.DataFrame, df_test: pd.DataFrame, k_recos: int
 ) -> Tuple[dict[str, float], float]:
-    dataset = Dataset.construct(df_train)
     start_train_time = time()
-    model.fit(dataset)
+    model.fit(df_train)
     train_time = time() - start_train_time
-    recos = model.recommend(
-        users=np.unique(df_test[Columns.User]),
-        dataset=dataset,
-        k=k_recos,
-        filter_viewed=True,
-    )
+    recos = model.predict(df_test)
     metric_values = calc_metrics(
         metrics,
         reco=recos,
@@ -68,7 +61,7 @@ def _calculate_model_metrics(
 def calculate_metrics(
     interactions: Interactions,
     metrics: dict[str, MetricAtK] | None,
-    model: ModelBase,
+    model,
     splitter: Splitter | None,
     k_recos: int,
 ) -> ModelMetrics:
@@ -88,7 +81,7 @@ def calculate_metrics(
         metric_values, train_time = _calculate_model_metrics(
             model=deepcopy(model), metrics=metrics, df_train=df_train, df_test=df_test, k_recos=k_recos
         )
-        fold_result = {"fold": fold_info["i_split"], "model": model.__class__.__name__, "train time (sec)": train_time}
+        fold_result = {"fold": fold_info["i_split"], "model": str(model), "train time (sec)": train_time}
         fold_result.update(metric_values)
         results.append(fold_result)
     return results
