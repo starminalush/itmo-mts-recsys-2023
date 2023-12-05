@@ -4,24 +4,21 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict
 
 import uvloop
+from exception_handlers import add_exception_handlers
 from fastapi import FastAPI
+from middlewares import add_middlewares
+from views import add_views
 
-from ..log import app_logger, setup_logging
-from ..recsys_models import PopModel, TestModel, UserKnn
-from ..recsys_models.model_loader import load
-from ..settings import ServiceConfig
-from .exception_handlers import add_exception_handlers
-from .middlewares import add_middlewares
-from .views import add_views
+from service.log import app_logger, setup_logging
+from service.recsys_models import BaseModel, TestModel, UserKnn
+from service.recsys_models.model_loader import load
+from service.settings import ServiceConfig
 
 __all__ = ("create_app",)
 
-test_model = TestModel()
-user_knn = UserKnn(
+test_model: BaseModel = TestModel()
+user_knn: BaseModel = UserKnn(
     backbone_model=load(os.getenv("USER_KNN_MODEL_PATH")),
-    cold_user_reco_model=PopModel(
-        dataset_path=os.getenv("POP_MODEL_DATASET"), backbone_model=load(os.getenv("POP_MODEL_WEIGHTS"))
-    ),
 )
 models = {"test_model": test_model, "userknn_tfidf": user_knn}
 

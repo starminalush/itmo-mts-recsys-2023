@@ -16,12 +16,15 @@ class UserKnn:
         self.is_fitted = False
         self._pop_model = PopularModel()
 
-    def get_mappings(self, train):
+    def get_mappings(self, train: pd.DataFrame) -> None:
         self.users_inv_mapping = dict(enumerate(train["user_id"].unique()))
         self.users_mapping = {v: k for k, v in self.users_inv_mapping.items()}
 
         self.items_inv_mapping = dict(enumerate(train["item_id"].unique()))
         self.items_mapping = {v: k for k, v in self.items_inv_mapping.items()}
+
+    def __str__(self):
+        return f"User KNN with {self._model.__class__.__name__}"
 
     def get_matrix(
         self,
@@ -56,13 +59,13 @@ class UserKnn:
 
     def fit(self, train: pd.DataFrame):
         self._user_knn = deepcopy(self._model)
-        self.get_mappings(train)
-        self.weights_matrix = self.get_matrix(train)
+        self.get_mappings(train=train)
+        self.weights_matrix = self.get_matrix(df=train)
 
         self.n = train.shape[0]
         self._count_item_idf(train)
 
-        self._user_knn.fit(self.weights_matrix)
+        self._user_knn.fit(weighted=self.weights_matrix)
         self._pop_model.fit(Dataset.construct(train))
         self._pop_items = [self.items_inv_mapping[p] for p in self._pop_model.popularity_list[0]]
         self.is_fitted = True
@@ -85,18 +88,27 @@ class UserKnn:
             model=self._user_knn,
             n=self._n_users,
         )
+        popular_items = self._get_popular(n_recs)
+        unique_users = np.unique(test.user_id.tolist())
         cold_recs = pd.DataFrame(
-            {'user_id': test.user_id, 'similar_user_id': -1,
-             'sim': 0.01})
-        cold_recs['item_id'] = cold_recs.apply(
-            lambda x: self._get_popular(num_reco=n_recs), axis=1)
-        cold_recs['item_id'] = cold_recs.apply(lambda x: self._get_popular(n_recs), axis=1)
+            {"user_id": unique_users, "similar_user_id": -1, "sim": 0.01, "item_id": [popular_items]}
+        )
 
-        if len(recs := pd.DataFrame({'user_id':test[test.user_id.isin(self.users_mapping)]['user_id'].unique()})) > 0:
+        if (
+            len(
+                recs := pd.DataFrame(
+                    {
+                        "user_id": test[np.in1d(test.user_id, np.fromiter(self.users_mapping.keys(), dtype=float))][
+                            "user_id"
+                        ].unique()
+                    }
+                )
+            )
+            > 0
+        ):
             recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
             recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
-            recs = recs[~(recs['user_id'] == recs['sim_user_id'])].merge(
-                self.watched, on=['sim_user_id'], how='left')
+            recs = recs[~(recs["user_id"] == recs["sim_user_id"])].merge(self.watched, on=["sim_user_id"], how="left")
 
         recs = pd.concat([recs, cold_recs])
 
@@ -109,4 +121,24 @@ class UserKnn:
         recs["score"] = np.multiply(recs["sim"], recs["idf"])
         recs = recs.sort_values(["user_id", "score"], ascending=False)
         recs["rank"] = recs.groupby("user_id").cumcount() + 1
-        return recs[recs["rank"] <= n_recs][["user_id", "item_id", "score", "rank"]]
+        return recs[recs["rank"] <= n_recs]
+
+    def recommend(self, user_id: int, num_reco: int) -> list[int]:
+        cold_recs = self._get_popular(num_reco)
+
+        if user_id not in self.users_mapping:
+            return cold_recs
+        internal_user_id = self.users_mapping[user_id]
+        rec_items = []
+        for sim_user, sim in zip(*self._user_knn.similar_items(internal_user_id, N=num_reco)):
+            if sim_user != internal_user_id:
+                original_user_id = self.users_inv_mapping.get(sim_user)
+                if items_watched_by_sim_user := self.watched.get(original_user_id):
+                    rec_items.extend([(item, sim * self.item_idf[item]) for item in items_watched_by_sim_user])
+        rec_items.sort(key=lambda x: x[1], reverse=False)
+
+        recos = [item for item, _ in rec_items][::-1]
+
+        if len(recos) < num_reco:
+            return recos + list(set(cold_recs) - set(recos))[: num_reco - len(recos)]
+        return recos[:num_reco]
