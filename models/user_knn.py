@@ -1,17 +1,20 @@
 from collections import Counter
-from typing import Dict
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
 import scipy as sp
 from implicit.nearest_neighbours import ItemItemRecommender
+from rectools.dataset import Dataset
+from rectools.models import PopularModel
 
 
 class UserKnn:
-    def __init__(self, model: ItemItemRecommender, N_users: int = 50):
-        self.N_users = N_users
-        self.model = model
+    def __init__(self, model: ItemItemRecommender, n_users: int = 50, pop_model: PopularModel = PopularModel()):
+        self._n_users = n_users
+        self._model = model
         self.is_fitted = False
+        self._pop_model = pop_model
 
     def get_mappings(self, train):
         self.users_inv_mapping = dict(enumerate(train["user_id"].unique()))
@@ -26,8 +29,6 @@ class UserKnn:
         user_col: str = "user_id",
         item_col: str = "item_id",
         weight_col: str = None,
-        users_mapping: Dict[int, int] = None,
-        items_mapping: Dict[int, int] = None,
     ):
         if weight_col:
             weights = df[weight_col].astype(np.float32)
@@ -54,51 +55,57 @@ class UserKnn:
         self.item_idf = item_idf
 
     def fit(self, train: pd.DataFrame):
-        self.user_knn = self.model
+        self._user_knn = deepcopy(self._model)
         self.get_mappings(train)
-        self.weights_matrix = self.get_matrix(train, users_mapping=self.users_mapping, items_mapping=self.items_mapping)
+        self.weights_matrix = self.get_matrix(train)
 
         self.n = train.shape[0]
         self._count_item_idf(train)
 
-        self.user_knn.fit(self.weights_matrix)
+        self._user_knn.fit(self.weights_matrix)
+        self._pop_model.fit(Dataset.construct(train))
         self.is_fitted = True
 
-    def _generate_recs_mapper(
-        self, model: ItemItemRecommender, user_mapping: Dict[int, int], user_inv_mapping: Dict[int, int], N: int
-    ):
+    def _generate_recs_mapper(self, model: ItemItemRecommender, n: int):
         def _recs_mapper(user):
             user_id = self.users_mapping[user]
-            users, sim = model.similar_items(user_id, N=N)
+            users, sim = model.similar_items(user_id, N=n)
             return [self.users_inv_mapping[user] for user in users], sim
 
         return _recs_mapper
 
-    def predict(self, test: pd.DataFrame, N_recs: int = 10):
+    def _get_popular(self, num_reco: int):
+        return [self.items_inv_mapping[p] for p in self._pop_model.popularity_list[0][:num_reco]]
+
+    def predict(self, test: pd.DataFrame, n_recs: int = 10):
         if not self.is_fitted:
             raise ValueError("Please call fit before predict")
-
         mapper = self._generate_recs_mapper(
-            model=self.user_knn,
-            user_mapping=self.users_mapping,
-            user_inv_mapping=self.users_inv_mapping,
-            N=self.N_users,
+            model=self._user_knn,
+            n=self._n_users,
         )
+        cold_recs = pd.DataFrame(
+            {'user_id': test.user_id, 'similar_user_id': -1,
+             'sim': 0.01})
+        cold_recs['item_id'] = cold_recs.apply(
+            lambda x: self._get_popular(num_reco=n_recs), axis=1)
+        cold_recs['item_id'] = cold_recs.apply(lambda x: self._get_popular(n_recs), axis=1)
 
-        recs = pd.DataFrame({"user_id": test["user_id"].unique()})
-        recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
-        recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
+        if len(recs := pd.DataFrame({'user_id':test[test.user_id.isin(self.users_mapping)]['user_id'].unique()})) > 0:
+            recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
+            recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
+            recs = recs[~(recs['user_id'] == recs['sim_user_id'])].merge(
+                self.watched, on=['sim_user_id'], how='left')
+
+        recs = pd.concat([recs, cold_recs])
 
         recs = (
-            recs[~(recs["user_id"] == recs["sim_user_id"])]
-            .merge(self.watched, on=["sim_user_id"], how="left")
-            .explode("item_id")
+            recs.explode("item_id")
             .sort_values(["user_id", "sim"], ascending=False)
             .drop_duplicates(["user_id", "item_id"], keep="first")
             .merge(self.item_idf, left_on="item_id", right_on="index", how="left")
         )
-
-        recs["score"] = recs["sim"] * recs["idf"]
+        recs["score"] = np.multiply(recs["sim"], recs["idf"])
         recs = recs.sort_values(["user_id", "score"], ascending=False)
         recs["rank"] = recs.groupby("user_id").cumcount() + 1
-        return recs[recs["rank"] <= N_recs][["user_id", "item_id", "score", "rank"]]
+        return recs[recs["rank"] <= n_recs][["user_id", "item_id", "score", "rank"]]
