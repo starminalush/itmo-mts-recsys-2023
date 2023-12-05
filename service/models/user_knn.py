@@ -65,7 +65,7 @@ class UserKnn:
         self.n = train.shape[0]
         self._count_item_idf(train)
 
-        self._user_knn.fit(weighted=self.weights_matrix)
+        self._user_knn.fit(self.weights_matrix)
         self._pop_model.fit(Dataset.construct(train))
         self._pop_items = [self.items_inv_mapping[p] for p in self._pop_model.popularity_list[0]]
         self.is_fitted = True
@@ -93,19 +93,9 @@ class UserKnn:
         cold_recs = pd.DataFrame(
             {"user_id": unique_users, "similar_user_id": -1, "sim": 0.01, "item_id": [popular_items]}
         )
-
-        if (
-            len(
-                recs := pd.DataFrame(
-                    {
-                        "user_id": test[np.in1d(test.user_id, np.fromiter(self.users_mapping.keys(), dtype=float))][
-                            "user_id"
-                        ].unique()
-                    }
-                )
-            )
-            > 0
-        ):
+        recs_user_ids = test[np.in1d(test.user_id, np.fromiter(self.users_mapping.keys(), dtype=float))]
+        recs = pd.DataFrame({"user_id": recs_user_ids["user_id"].unique()})
+        if len(recs) > 0:
             recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
             recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
             recs = recs[~(recs["user_id"] == recs["sim_user_id"])].merge(self.watched, on=["sim_user_id"], how="left")

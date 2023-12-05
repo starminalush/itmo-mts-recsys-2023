@@ -45,7 +45,7 @@ def _calculate_model_metrics(
     model, metrics: dict[str, MetricAtK], df_train: pd.DataFrame, df_test: pd.DataFrame, k_recos: int
 ) -> Tuple[dict[str, float], float]:
     start_train_time = time()
-    model.fit(df_train)
+    model.fit(train=df_train)
     train_time = time() - start_train_time
     recos = model.predict(df_test)
     metric_values = calc_metrics(
