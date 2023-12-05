@@ -84,34 +84,26 @@ class UserKnn:
     def predict(self, test: pd.DataFrame, n_recs: int = 10):
         if not self.is_fitted:
             raise ValueError("Please call fit before predict")
-        mapper = self._generate_recs_mapper(
-            model=self._user_knn,
-            n=self._n_users,
-        )
-        popular_items = self._get_popular(n_recs)
-        unique_users = np.unique(test.user_id.tolist())
-        cold_recs = pd.DataFrame(
-            {"user_id": unique_users, "similar_user_id": -1, "sim": 0.01, "item_id": [popular_items]}
-        )
-        recs_user_ids = test[np.in1d(test.user_id, np.fromiter(self.users_mapping.keys(), dtype=float))]
-        recs = pd.DataFrame({"user_id": recs_user_ids["user_id"].unique()})
-        if len(recs) > 0:
-            recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
-            recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
-            recs = recs[~(recs["user_id"] == recs["sim_user_id"])].merge(self.watched, on=["sim_user_id"], how="left")
 
-        recs = pd.concat([recs, cold_recs])
+        mapper = self._generate_recs_mapper(model=self._user_knn, n=self._n_users)
+
+        recs = pd.DataFrame({"user_id": test["user_id"].unique()})
+        recs["sim_user_id"], recs["sim"] = zip(*recs["user_id"].map(mapper))
+        recs = recs.set_index("user_id").apply(pd.Series.explode).reset_index()
 
         recs = (
-            recs.explode("item_id")
+            recs[~(recs["user_id"] == recs["sim_user_id"])]
+            .merge(self.watched, on=["sim_user_id"], how="left")
+            .explode("item_id")
             .sort_values(["user_id", "sim"], ascending=False)
             .drop_duplicates(["user_id", "item_id"], keep="first")
             .merge(self.item_idf, left_on="item_id", right_on="index", how="left")
         )
-        recs["score"] = np.multiply(recs["sim"], recs["idf"])
+
+        recs["score"] = recs["sim"] * recs["idf"]
         recs = recs.sort_values(["user_id", "score"], ascending=False)
         recs["rank"] = recs.groupby("user_id").cumcount() + 1
-        return recs[recs["rank"] <= n_recs]
+        return recs[recs["rank"] <= n_recs][["user_id", "item_id", "score", "rank"]]
 
     def recommend(self, user_id: int, num_reco: int) -> list[int]:
         cold_recs = self._get_popular(num_reco)
