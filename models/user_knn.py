@@ -10,11 +10,11 @@ from rectools.models import PopularModel
 
 
 class UserKnn:
-    def __init__(self, model: ItemItemRecommender, n_users: int = 50, pop_model: PopularModel = PopularModel()):
+    def __init__(self, model: ItemItemRecommender, n_users: int = 50):
         self._n_users = n_users
         self._model = model
         self.is_fitted = False
-        self._pop_model = pop_model
+        self._pop_model = PopularModel()
 
     def get_mappings(self, train):
         self.users_inv_mapping = dict(enumerate(train["user_id"].unique()))
@@ -64,6 +64,7 @@ class UserKnn:
 
         self._user_knn.fit(self.weights_matrix)
         self._pop_model.fit(Dataset.construct(train))
+        self._pop_items = [self.items_inv_mapping[p] for p in self._pop_model.popularity_list[0]]
         self.is_fitted = True
 
     def _generate_recs_mapper(self, model: ItemItemRecommender, n: int):
@@ -75,7 +76,7 @@ class UserKnn:
         return _recs_mapper
 
     def _get_popular(self, num_reco: int):
-        return [self.items_inv_mapping[p] for p in self._pop_model.popularity_list[0][:num_reco]]
+        return self._pop_items[:num_reco]
 
     def predict(self, test: pd.DataFrame, n_recs: int = 10):
         if not self.is_fitted:

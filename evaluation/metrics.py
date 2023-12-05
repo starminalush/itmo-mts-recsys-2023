@@ -59,7 +59,7 @@ def _calculate_model_metrics(
 
 
 def calculate_metrics(
-    interactions: Interactions,
+    interactions,
     metrics: dict[str, MetricAtK] | None,
     model,
     splitter: Splitter | None,
