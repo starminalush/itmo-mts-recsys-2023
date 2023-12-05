@@ -21,6 +21,9 @@ httpx = "^0.25.1"
 uvicorn = "^0.24.0.post1"
 rectools = "0.4.1"
 jupyter = "^1.0.0"
+cattrs = "^23.2.3"
+h11 = "0.10.0"
+numba = "^0.58.1"
 
 
 [tool.poetry.group.dev.dependencies]
