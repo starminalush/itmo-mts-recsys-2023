@@ -21,6 +21,8 @@ httpx = "^0.25.1"
 uvicorn = "^0.24.0.post1"
 rectools = "0.4.1"
 jupyter = "^1.0.0"
+cattrs = "^23.2.3"
+h11 = "0.10.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -31,6 +33,7 @@ flake8 = "^6.1.0"
 pylint = "^3.0.2"
 black = "^23.11.0"
 nbqa = "^1.7.0"
+pytest-mock = "^3.12.0"
 
 [tool.black]
 line-length = 120
