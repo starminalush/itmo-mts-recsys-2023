@@ -1,11 +1,16 @@
 import asyncio
+import os
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict
 
 import uvloop
 from fastapi import FastAPI
 
+from service.utils.unpickler import load
+
 from ..log import app_logger, setup_logging
+from ..recsys_models.ann import ANN
+from ..recsys_models.popular_model import PopModel
 from ..recsys_models.test import TestModel
 from ..settings import ServiceConfig
 from .exception_handlers import add_exception_handlers
@@ -14,7 +19,15 @@ from .views import add_views
 
 __all__ = ("create_app",)
 
-models = {"test_model": TestModel()}
+models = {
+    "test_model": TestModel(),
+    "ann_als": ANN(
+        backbone_model=load(os.getenv("ANN_MODEL_PATH")),
+        popular_model=PopModel(
+            dataset_path=os.getenv("KION_DATASET"), backbone_model=load(os.getenv("POP_MODEL_PATH"))
+        ),
+    ),
+}
 
 
 def setup_asyncio(thread_name_prefix: str) -> None:
