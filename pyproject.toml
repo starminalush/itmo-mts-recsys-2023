@@ -23,6 +23,7 @@ rectools = {extras = ["nmslib"], version = "^0.4.2"}
 jupyter = "^1.0.0"
 implicit = "^0.7.2"
 py-spy = "^0.3.14"
+cattrs = "^23.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
