@@ -16,6 +16,7 @@ from .patches import NoAuthSimpleBearerPatch, TestSimpleBearerAuth, monkey_patch
 def service_config() -> ServiceConfig:
     return get_config()
 
+
 @pytest.fixture
 def app(service_config: ServiceConfig) -> FastAPI:
     new_app = FastAPI(debug=False)
