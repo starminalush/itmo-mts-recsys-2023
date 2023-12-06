@@ -13,12 +13,14 @@ from ..recsys_models.ann import ANN
 from ..recsys_models.popular_model import PopModel
 from ..recsys_models.test import TestModel
 from ..settings import ServiceConfig
+from .deps import load_models
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
 from .views import add_views
 
 __all__ = ("create_app",)
 
+# тут только те модели, которые нужны на момент запуска ДЗ, иначе ноут умрет
 models = {
     "test_model": TestModel(),
     "ann_als": ANN(
