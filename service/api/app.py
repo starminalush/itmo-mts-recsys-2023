@@ -51,7 +51,7 @@ def create_app(config: ServiceConfig) -> FastAPI:
 
     new_app = FastAPI(debug=False)
     new_app.state.k_recs = config.k_recs
-    new_app.state.models = models
+    new_app.state.models = load_models()
     add_views(new_app)
     add_middlewares(new_app)
     add_exception_handlers(new_app)

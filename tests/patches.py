@@ -1,8 +1,7 @@
 from fastapi import Request
 
 from service.api.auth import SimpleBearerAuth
-from service.recsys_models.base import BaseModel
-from service.recsys_models.test import TestModel
+from service.recsys_models import BaseModel, TestModel
 
 
 class NoAuthSimpleBearerPatch(SimpleBearerAuth):

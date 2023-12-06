@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, Request
 
 from service.api.auth import bearer_auth
@@ -52,6 +54,7 @@ async def get_reco(request: Request, model_name: str, user_id: int) -> RecoRespo
     k_recs = request.app.state.k_recs
     try:
         reco = model.get_reco(user_id=user_id, num_reco=k_recs)
-    except ValueError:
+    except ValueError as err:
+        logging.error(err)
         raise UserNotFoundError(error_message=f"User {user_id} not found")
     return RecoResponse(user_id=user_id, items=reco)
