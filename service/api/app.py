@@ -40,7 +40,7 @@ def create_app(config: ServiceConfig) -> FastAPI:
 
     models = {
         "test_model": TestModel(),
-        "ann_als": ANN(
+        "ann_lightfm": ANN(
             backbone_model=load(config.ann_model_path),
             popular_model=PopModel(
                 dataset_path=config.kion_dataset_path, backbone_model=load(config.popular_model_path)
