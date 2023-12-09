@@ -21,9 +21,11 @@ httpx = "^0.25.1"
 uvicorn = "^0.24.0.post1"
 rectools = {extras = ["nmslib"], version = "^0.4.2"}
 jupyter = "^1.0.0"
-implicit = "^0.7.2"
 py-spy = "^0.3.14"
 cattrs = "^23.2.3"
+lightfm = {git = "https://github.com/lyst/lightfm.git"}
+hnswlib = "^0.8.0"
+annoy = "^1.17.3"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,3 +1,5 @@
+from os import getenv as env
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +18,10 @@ class ServiceConfig(Config):
     k_recs: int = 10
 
     log_config: LogConfig
+
+    ann_model_path: str = env("ANN_MODEL_PATH", "/usr/src/app/weights/ann_lightfm.pkl")
+    popular_model_path: str = env("POP_MODEL_PATH", "/usr/src/app/weights/pop_model.pkl")
+    kion_dataset_path: str = env("KION_DATASET", "datasets/kion_interactions.csv")
 
 
 def get_config() -> ServiceConfig:

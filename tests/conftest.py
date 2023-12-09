@@ -9,9 +9,10 @@ from service.api.auth import bearer_auth
 from service.api.exception_handlers import add_exception_handlers
 from service.api.middlewares import add_middlewares
 from service.api.views import add_views
+from service.recsys_models import TestModel
 from service.settings import ServiceConfig, get_config
 
-from .patches import NoAuthSimpleBearerPatch, TestSimpleBearerAuth, monkey_patched_get_test_models
+from .patches import NoAuthSimpleBearerPatch, TestSimpleBearerAuth
 
 
 @pytest.fixture
@@ -23,7 +24,7 @@ def service_config() -> ServiceConfig:
 def app(service_config: ServiceConfig) -> FastAPI:
     new_app = FastAPI(debug=False)
     new_app.state.k_recs = service_config.k_recs
-    new_app.state.models = monkey_patched_get_test_models()
+    new_app.state.models = {"test_model": TestModel()}
     add_views(new_app)
     add_middlewares(new_app)
     add_exception_handlers(new_app)

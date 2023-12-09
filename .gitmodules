@@ -1,0 +1,6 @@
+[submodule "submodules/NGT"]
+	path = submodules/NGT
+	url = https://github.com/yahoojapan/NGT.git
+[submodule "submodules/ngt"]
+	path = submodules/ngt
+	url = https://github.com/yahoojapan/ngt.git

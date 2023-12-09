@@ -1,5 +1,4 @@
 import asyncio
-import os
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict
 
@@ -13,23 +12,11 @@ from ..recsys_models.ann import ANN
 from ..recsys_models.popular_model import PopModel
 from ..recsys_models.test import TestModel
 from ..settings import ServiceConfig
-from .deps import load_models
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
 from .views import add_views
 
 __all__ = ("create_app",)
-
-# тут только те модели, которые нужны на момент запуска ДЗ, иначе ноут умрет
-models = {
-    "test_model": TestModel(),
-    "ann_als": ANN(
-        backbone_model=load(os.getenv("ANN_MODEL_PATH")),
-        popular_model=PopModel(
-            dataset_path=os.getenv("KION_DATASET"), backbone_model=load(os.getenv("POP_MODEL_PATH"))
-        ),
-    ),
-}
 
 
 def setup_asyncio(thread_name_prefix: str) -> None:
@@ -51,9 +38,19 @@ def create_app(config: ServiceConfig) -> FastAPI:
     setup_logging(config)
     setup_asyncio(thread_name_prefix=config.service_name)
 
+    models = {
+        "test_model": TestModel(),
+        "ann_als": ANN(
+            backbone_model=load(config.ann_model_path),
+            popular_model=PopModel(
+                dataset_path=config.kion_dataset_path, backbone_model=load(config.popular_model_path)
+            ),
+        ),
+    }
+
     new_app = FastAPI(debug=False)
     new_app.state.k_recs = config.k_recs
-    new_app.state.models = load_models()
+    new_app.state.models = models
     add_views(new_app)
     add_middlewares(new_app)
     add_exception_handlers(new_app)
