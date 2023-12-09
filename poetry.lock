@@ -1721,6 +1721,32 @@ files = [
 ]
 
 [[package]]
+name = "ngt"
+version = "2.1.6"
+description = "python NGT"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ngt-2.1.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:66c137f92587f50d03d52b6c781c9542fbe03952499a28c221bea867239553f7"},
+    {file = "ngt-2.1.6-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:b879ca7161f18d35a9151a0cdf40bd2188a55cf5b50e43624d0600ff54ca855b"},
+    {file = "ngt-2.1.6-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:1e11d9c6942f617e17b1b02c31d1a87619acbd9e4b2cd5f76ba9179c0a04c2af"},
+    {file = "ngt-2.1.6-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:cc2474e730a6769b018e08933fe17e6d7da7b137875cbbb2b679f56947379846"},
+    {file = "ngt-2.1.6-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4d679d05c55da8b9d5e46451e332a1e7b12e11d25fba4cb3b2d52b3efb3bece3"},
+    {file = "ngt-2.1.6-cp36-cp36m-manylinux_2_28_x86_64.whl", hash = "sha256:2beb6c34f1d3ec441e4209eeca4eb22b56c64ecc1b070737e58354a30c5853ee"},
+    {file = "ngt-2.1.6-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:af490ccfd8d1350829c8e7d2bf9133265f9725d8e99e19297ac92740d5c42225"},
+    {file = "ngt-2.1.6-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:146a5c6f772682f81b068de287eb66649f49d58006d32d36d8d408c9c7a3d600"},
+    {file = "ngt-2.1.6-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:90fff123dfbbb1c5880d837f07f3d4a6732e40621dcfe302064301e5ff761f94"},
+    {file = "ngt-2.1.6-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:ab1baed81016c0a1c3f05f4229d703dcf9ac030f0684b26e5dd0b5b8a16985af"},
+    {file = "ngt-2.1.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:af959e0829c8a984ef88d40e7029126b9fbdec0d1d9255b4f5e75f72ee127e6b"},
+    {file = "ngt-2.1.6-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:cd61817e6a8d83e302b214441eaac80adaccec65563cc0af47556110547bb24e"},
+]
+
+[package.dependencies]
+numpy = "*"
+pybind11 = "*"
+
+[[package]]
 name = "nmslib"
 version = "2.1.1"
 description = "Non-Metric Space Library (NMSLIB)"
@@ -3504,4 +3530,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10.12,<3.11"
-content-hash = "f350a00dad1ae5a453c226891c45e7445be4d502434ebbcce7ee7075f7c7560b"
+content-hash = "0a8bd203f8183038e3ef56500713b027326539b446d3ce1f149624c2e1b906c0"
