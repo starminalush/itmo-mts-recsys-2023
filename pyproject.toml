@@ -23,10 +23,12 @@ rectools = {extras = ["nmslib"], version = "^0.4.2"}
 jupyter = "^1.0.0"
 py-spy = "^0.3.14"
 cattrs = "^23.2.3"
-lightfm = {git = "https://github.com/lyst/lightfm.git"}
 hnswlib = "^0.8.0"
 annoy = "^1.17.3"
 ngt = "^2.1.6"
+lightfm = {git = "https://github.com/lyst/lightfm.git"}
+optuna = "^3.4.0"
+cupy-cuda12x = "^12.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
