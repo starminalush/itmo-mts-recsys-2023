@@ -5,10 +5,13 @@ from typing import Any, Dict
 import uvloop
 from fastapi import FastAPI
 
-from service.log import app_logger, setup_logging
-from service.settings import ServiceConfig
+from service.utils.unpickler import load
 
-from .deps import load_models
+from ..log import app_logger, setup_logging
+from ..recsys_models.ann import ANN
+from ..recsys_models.popular_model import PopModel
+from ..recsys_models.test import TestModel
+from ..settings import ServiceConfig
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
 from .views import add_views
@@ -35,9 +38,19 @@ def create_app(config: ServiceConfig) -> FastAPI:
     setup_logging(config)
     setup_asyncio(thread_name_prefix=config.service_name)
 
+    models = {
+        "test_model": TestModel(),
+        "ann_als": ANN(
+            backbone_model=load(config.ann_model_path),
+            popular_model=PopModel(
+                dataset_path=config.kion_dataset_path, backbone_model=load(config.popular_model_path)
+            ),
+        ),
+    }
+
     new_app = FastAPI(debug=False)
     new_app.state.k_recs = config.k_recs
-    new_app.state.models = load_models()
+    new_app.state.models = models
     add_views(new_app)
     add_middlewares(new_app)
     add_exception_handlers(new_app)

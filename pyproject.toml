@@ -19,10 +19,16 @@ gunicorn = "^21.2.0"
 orjson = "^3.9.10"
 httpx = "^0.25.1"
 uvicorn = "^0.24.0.post1"
-rectools = "0.4.1"
+rectools = {extras = ["nmslib"], version = "^0.4.2"}
 jupyter = "^1.0.0"
+py-spy = "^0.3.14"
 cattrs = "^23.2.3"
-h11 = "0.10.0"
+hnswlib = "^0.8.0"
+annoy = "^1.17.3"
+ngt = "^2.1.6"
+lightfm = {git = "https://github.com/lyst/lightfm.git"}
+optuna = "^3.4.0"
+cupy-cuda12x = "^12.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
