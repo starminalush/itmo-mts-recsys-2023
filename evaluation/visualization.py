@@ -54,7 +54,7 @@ def visualize_training_result(
     report = pd.concat([recos, history])
     count_views = interactions.df.groupby("item_id").count()["user_id"]
     report = report.merge(item_data, how="inner", on="item_id")
-    count_views.name = "count_views"
+    count_views.name = "count_juviews"
     report = report.merge(count_views, how="inner", on="item_id")
 
     report.sort_values(["user_id", "type"], inplace=True)

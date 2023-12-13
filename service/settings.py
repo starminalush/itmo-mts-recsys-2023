@@ -23,7 +23,8 @@ class ServiceConfig(Config):
     popular_model_path: str = env("POP_MODEL_PATH", "/usr/src/app/weights/pop_model.pkl")
     kion_dataset_path: str = env("KION_DATASET", "datasets/kion_interactions.csv")
 
-    multivae_recos_path: str = "offline/multivae_user_reco.json"
+    vae_recos_path: str = "offline/vae_recos.json"
+    multivae_recos_path: str  = "offline/multivae_user_reco.json"
 
 
 def get_config() -> ServiceConfig:
