@@ -14,17 +14,18 @@ class LogConfig(Config):
 
 
 class ServiceConfig(Config):
+    model_config = SettingsConfigDict(env_file=".env")
     service_name: str = "reco_service"
     k_recs: int = 10
 
     log_config: LogConfig
 
-    ann_model_path: str = env("ANN_MODEL_PATH", "/usr/src/app/weights/ann_lightfm.pkl")
-    popular_model_path: str = env("POP_MODEL_PATH", "/usr/src/app/weights/pop_model.pkl")
-    kion_dataset_path: str = env("KION_DATASET", "datasets/kion_interactions.csv")
+    ann_model_path: str
+    pop_model_path: str
+    kion_dataset_path: str
 
-    vae_recos_path: str = "offline/vae_recos.json"
-    multivae_recos_path: str  = "offline/multivae_user_reco.json"
+    vae_recos_path: str
+    multivae_recos_path: str
 
 
 def get_config() -> ServiceConfig:
