@@ -11,7 +11,7 @@ class OfflineReco(BaseModel):
         self._pop_model = popular_model
 
     def _load_recos(self, recos_path: Path | str):
-        with open(recos_path, encoding='utf-8') as jf:
+        with open(recos_path, encoding="utf-8") as jf:
             return json.load(jf)
 
     def get_reco(self, user_id: int, num_reco: int) -> list[int]:

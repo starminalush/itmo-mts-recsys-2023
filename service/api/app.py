@@ -40,15 +40,15 @@ def create_app(config: ServiceConfig) -> FastAPI:
     models = {
         "vae_reco_offline": OfflineReco(
             recos_path=config.vae_recos_path,
-            popular_model=PopModel(
-                dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)
-            ),
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
         ),
         "multivae": OfflineReco(
             recos_path=config.multivae_recos_path,
-            popular_model=PopModel(
-                dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)
-            ),
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
+        ),
+        "dssm": OfflineReco(
+            recos_path=config.dssm_recos_path,
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
         ),
     }
 
