@@ -29,6 +29,7 @@ ngt = "^2.1.6"
 lightfm = {git = "https://github.com/lyst/lightfm.git"}
 optuna = "^3.4.0"
 cupy-cuda12x = "^12.3.0"
+pylint = "^3.0.3"
 
 
 [tool.poetry.group.dev.dependencies]
