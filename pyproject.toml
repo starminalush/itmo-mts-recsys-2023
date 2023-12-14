@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10.12,<3.11"
+python = ">=3.10,<3.11"
 fastapi = "^0.104.1"
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
@@ -29,6 +29,7 @@ ngt = "^2.1.6"
 lightfm = {git = "https://github.com/lyst/lightfm.git"}
 optuna = "^3.4.0"
 cupy-cuda12x = "^12.3.0"
+pylint = "^3.0.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -36,7 +37,6 @@ pytest = "^7.4.3"
 mypy = "^1.7.0"
 isort = "^5.12.0"
 flake8 = "^6.1.0"
-pylint = "^3.0.2"
 black = "^23.11.0"
 nbqa = "^1.7.0"
 pytest-mock = "^3.12.0"

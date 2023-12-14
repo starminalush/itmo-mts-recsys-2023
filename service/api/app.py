@@ -8,9 +8,8 @@ from fastapi import FastAPI
 from service.utils.unpickler import load
 
 from ..log import app_logger, setup_logging
-from ..recsys_models.ann import ANN
+from ..recsys_models.offline_reco import OfflineReco
 from ..recsys_models.popular_model import PopModel
-from ..recsys_models.test import TestModel
 from ..settings import ServiceConfig
 from .exception_handlers import add_exception_handlers
 from .middlewares import add_middlewares
@@ -39,12 +38,17 @@ def create_app(config: ServiceConfig) -> FastAPI:
     setup_asyncio(thread_name_prefix=config.service_name)
 
     models = {
-        "test_model": TestModel(),
-        "ann_als": ANN(
-            backbone_model=load(config.ann_model_path),
-            popular_model=PopModel(
-                dataset_path=config.kion_dataset_path, backbone_model=load(config.popular_model_path)
-            ),
+        "vae_reco_offline": OfflineReco(
+            recos_path=config.vae_recos_path,
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
+        ),
+        "multivae": OfflineReco(
+            recos_path=config.multivae_recos_path,
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
+        ),
+        "dssm": OfflineReco(
+            recos_path=config.dssm_recos_path,
+            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
         ),
     }
 
