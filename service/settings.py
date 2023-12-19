@@ -26,6 +26,7 @@ class ServiceConfig(Config):
     vae_recos_path: str = "offline/vae_recos.json"
     multivae_recos_path: str = "offline/multivae_user_reco.json"
     dssm_recos_path: str = "offline/dssm.json"
+    two_stage_ranking: str = "offline/xgb_ranking_recos.json"
     token: str = "testtoken"
 
 

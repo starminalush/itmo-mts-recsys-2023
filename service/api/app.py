@@ -38,16 +38,8 @@ def create_app(config: ServiceConfig) -> FastAPI:
     setup_asyncio(thread_name_prefix=config.service_name)
 
     models = {
-        "vae_reco_offline": OfflineReco(
-            recos_path=config.vae_recos_path,
-            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
-        ),
-        "multivae": OfflineReco(
-            recos_path=config.multivae_recos_path,
-            popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
-        ),
-        "dssm": OfflineReco(
-            recos_path=config.dssm_recos_path,
+        "two_stage_ranking_xgboost": OfflineReco(
+            recos_path=config.two_stage_ranking,
             popular_model=PopModel(dataset_path=config.kion_dataset_path, backbone_model=load(config.pop_model_path)),
         ),
     }
